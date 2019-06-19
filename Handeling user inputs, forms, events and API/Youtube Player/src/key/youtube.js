@@ -1,3 +1,3 @@
-const KEY = 'AIzaSyA4sF1qpKCKC8CNZnJpDYhvPxrt46w_Nhw';
+const KEY = 'get your own developer key';
 
 export default KEY;
