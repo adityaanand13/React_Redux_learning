@@ -1,14 +1,45 @@
 import React from 'react';
 import { connect } from "react-redux";
+import flv from 'flv.js';
 
 import { fetchStream } from '../../actions';
-import {Header,Segment, Dimmer, Loader} from "semantic-ui-react";
-
+import {Header,Segment, Dimmer, Loader, Icon} from "semantic-ui-react";
 
 class StreamShow extends React.Component {
 
+    constructor(props) {
+        super(props);
+
+        this.videoRef = React.createRef();
+    }
+
     componentDidMount() {
-        this.props.fetchStream(this.props.match.params.id);
+        const { id } = this.props.match.params;
+
+        this.props.fetchStream(id);
+        this.buildPlayer();
+    }
+
+    componentDidUpdate() {
+        this.buildPlayer();
+    }
+
+    componentWillUnmount() {
+        this.player.destroy();
+    }
+
+    buildPlayer() {
+        if (this.player || !this.props.stream) {
+            return;
+        }
+
+        const { id } = this.props.match.params;
+        this.player = flv.createPlayer({
+            type: 'flv',
+            url: `http://localhost:8000/live/${id}.flv`
+        });
+        this.player.attachMediaElement(this.videoRef.current);
+        this.player.load();
     }
 
     render() {
@@ -24,9 +55,15 @@ class StreamShow extends React.Component {
                 </div>
             )
         }
+        const {title, description} =  this.props.stream;
         return(
             <div>
-                <Header  as='h2' inverted  dividing>Showing stream: <span style={{color:'red'}}>{this.props.stream.title}</span></Header>
+                <Header  as='h2' inverted  dividing>Now streaming: <span style={{color:'red'}}>{title}</span></Header>
+
+                <Segment raised placeholder inverted>
+                    <video ref={this.videoRef} style={{ width: '100%' }} controls/>
+                    <Header as='h4' ><Icon name='video' />{description}.</Header>
+                </Segment>
             </div>
         );
     }
